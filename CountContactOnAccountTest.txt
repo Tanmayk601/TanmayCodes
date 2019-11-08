@@ -1,0 +1,87 @@
+/*
+ * Author: Tanmay Kumar
+ * Trigger: CountContactOnAccount
+*/
+
+@isTest(seeAllData=false)
+public class CountContactOnAccountTest {
+    
+    //Creating Test Data    
+    @testSetup private static void setupData(){
+        //Creation of 5 Accounts
+        List<Account> accList = new List<Account>();
+        for(Integer i=1;i<=5;i++){
+            Account acc=new Account();
+            acc.Name='TestAccount '+i;
+            accList.add(acc);
+        }
+        insert accList;
+        
+        List<Contact> conList = new List<Contact>();
+        for(Integer i=1;i<=2;i++){
+            Contact con=new Contact();
+            con.LastName='TestContact '+i;
+            conList.add(con);
+        }
+        insert conList;
+    }
+    
+    private static testMethod void testAccountUpdateonContactInsert(){
+        List<Account> accList = [SELECT Id,(SELECT Id FROM Contacts) FROM Account];
+        Test.startTest();
+        System.assertEquals(accList[0].Contacts.size(),0);
+        Contact con = new Contact();
+        con.LastName='Test Contact Insert';
+        con.AccountId=accList[0].Id;
+        insert con;
+        accList = [SELECT Id,(SELECT Id FROM Contacts) FROM Account];
+        System.assertEquals(accList[0].Contacts.size(),1);
+        Test.stopTest();
+    }
+    
+    private static testMethod void testAccountUpdateonContactUpdate(){
+        List<Account> accList = [SELECT Id,(SELECT Id FROM Contacts) FROM Account];
+        Test.startTest();
+        
+        Contact conObj=[SELECT Id,AccountId FROM Contact WHERE LastName LIKE 'TestContact 1' LIMIT 1];
+        System.assertEquals(conObj.AccountId,NULL);
+        System.assertEquals(accList[0].Contacts.size(),0);
+        
+        conObj.AccountId=accList[0].Id;
+        update conObj;
+        
+        accList = [SELECT Id,(SELECT Id FROM Contacts) FROM Account];
+        conObj=[SELECT Id,AccountId FROM Contact WHERE LastName LIKE 'TestContact 1' LIMIT 1];
+        
+        System.assertEquals(accList[0].Contacts.size(),1);
+        System.assertEquals(conObj.AccountId,accList[0].Id);
+        
+        Test.stopTest();
+    }
+    
+    private static testMethod void testAccountUpdateonContactDelete(){
+        List<Account> accList = [SELECT Id,(SELECT Id FROM Contacts) FROM Account];        
+        Contact conObj=[SELECT Id,AccountId FROM Contact WHERE LastName LIKE 'TestContact 1' LIMIT 1];
+        System.assertEquals(conObj.AccountId,NULL);
+        System.assertEquals(accList[0].Contacts.size(),0);
+        
+        conObj.AccountId=accList[0].Id;
+        update conObj;
+        
+        accList = [SELECT Id,(SELECT Id FROM Contacts) FROM Account];
+        conObj=[SELECT Id,AccountId FROM Contact WHERE LastName LIKE 'TestContact 1' LIMIT 1];
+        
+        System.assertEquals(accList[0].Contacts.size(),1);
+        System.assertEquals(conObj.AccountId,accList[0].Id);
+        
+        Test.startTest();
+        delete conObj;
+        
+        accList = [SELECT Id,(SELECT Id FROM Contacts) FROM Account];
+        
+        System.assertEquals(accList[0].Contacts.size(),0);
+        
+        Test.stopTest();
+    }
+    
+}

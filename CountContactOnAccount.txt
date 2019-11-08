@@ -1,0 +1,49 @@
+/*
+* Author: Tanmay Kumar
+* Description: Trigger to update associated Account(Parent) with the count of 'Contact' records(childs) 
+				AND populate the 'Number_of_Contacts__c' field on Account.
+* Trigger will fire whenever a 'Contact' record is inserted, updated, deleted or undeleted.
+* Test Class: CountContactOnAccountTest
+*/
+
+
+trigger CountContactOnAccount on Contact (after insert, after update, after delete, after undelete) {
+    set<id> accountIds = new set<id>();
+    List<Account> updateAccountList = new List<Account>();
+    
+    if(Trigger.isDelete){
+        for(contact con: Trigger.old){
+            if(NULL!=con.AccountId){
+                accountIds.add(con.AccountId);
+            }            
+        }
+    }else{
+        for(contact con: Trigger.new){
+            if(Trigger.isInsert || Trigger.isUndelete){
+                if(NULL!=con.AccountId){
+                    accountIds.add(con.AccountId);
+                }
+            }else{
+                contact oldContact = Trigger.oldMap.get(con.Id);
+                if(oldContact.AccountId != con.AccountId){
+                    if(NULL!=con.AccountId){
+                        accountIds.add(con.AccountId);
+                    }
+                    if(NULL!=oldContact.AccountId){
+                        accountIds.add(oldContact.AccountId);
+                    }
+                }
+            }
+        }
+    }
+    if(NULL!=accountIds && !accountIds.isEmpty()){
+        for(Account acc :[SELECT Id, Number_of_Contacts__c, (SELECT Id FROM Contacts) FROM Account WHERE Id IN :accountIds]){
+            Account obj = new Account();
+            obj.Id = acc.id;
+            obj.Number_of_Contacts__c = acc.Contacts.size();
+            updateAccountList.add(obj);
+            
+        }        
+        update  updateAccountList;
+    }
+}
