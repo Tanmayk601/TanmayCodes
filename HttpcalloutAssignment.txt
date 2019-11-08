@@ -1,0 +1,17 @@
+global class HttpCalloutAssignment {
+    global static void HttpCalloutMethod(){
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        //Following endpoint has been created as a RemoteSiteSettings in SFDC
+        request.setEndpoint('https://postman-echo.com/get?foo1=bar1&foo2=bar2');
+        request.setMethod('GET');
+        HttpResponse response = http.send(request);
+        //If the request is successful, parse the JSON response.
+        if (response.getStatusCode() == 200){
+            Map<String, Object> results = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
+            for (String attributeName : results.keyset()) {
+                System.debug(attributeName + ' = '+ results.get(attributeName));
+            }
+        }
+    }
+}

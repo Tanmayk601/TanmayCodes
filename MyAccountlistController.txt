@@ -1,0 +1,17 @@
+({
+    doInit : function(component, event, helper) {
+        var action = component.get("c.getAccountList");
+        action.setParams({
+            
+        });        
+        action.setCallback(this, function(response){
+            var responseValue = response.getReturnValue();
+            component.set('v.AccountsList', responseValue);
+            component.set('v.columns',[
+                {label: 'Account name', fieldName: 'Name', type: 'text'},
+                {label: 'Phone Number', fieldName: 'Phone', type: 'text'}
+            ]);
+        });
+        $A.enqueueAction(action, false);
+    },
+})

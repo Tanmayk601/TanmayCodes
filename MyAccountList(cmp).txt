@@ -1,0 +1,18 @@
+<aura:component controller = "MyAccountListController" >
+    <aura:attribute name="AccountsList" type="Account[]" />
+    <aura:attribute name="columns" type="List" default="[]"/>
+    <aura:attribute name="keyField" type="String" default="id"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <lightning:card title="Account List">
+        <lightning:layoutItem padding="horizontal-small">
+            
+            <lightning:datatable columns="{!v.columns}"
+                                 data="{!v.AccountsList}"
+                                 keyField="{!v.keyField}"
+                                 sortable = "true"
+                                 hideCheckboxColumn="true"/>
+            
+        </lightning:layoutItem>
+    </lightning:card>
+</aura:component>

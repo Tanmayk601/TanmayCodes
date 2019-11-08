@@ -1,0 +1,17 @@
+/*  Created By: Tanmay Kumar 
+ *  Description: Controller returns most recent 10 Accounts.
+ *  Test Class: MyAccountListControllerTest
+*/
+
+public without sharing class MyAccountListController {
+@AuraEnabled(cacheable =true)
+    public static List<Account> getAccountList(){
+        List<Account> accountList = [SELECT Id,Name, Phone FROM Account ORDER BY CreatedDate DESC LIMIT 10];
+        if(NULL!= accountList && !accountList.isEmpty()){
+             return accountList; 
+        } else {
+            return new List<Account>();
+        }
+      
+    }
+}
